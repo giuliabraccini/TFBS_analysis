@@ -2,11 +2,13 @@
 process FIND_MOTIFS_GENOME {
 
     tag "${bed}"
-    //container "docker.io/mathysgrapotte/stimulus-py:latest"
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'https://depot.galaxyproject.org/singularity/homer:4.11--pl526hc9558a2_3' :
+        'biocontainers/homer:4.11--pl526hc9558a2_3' }"
 
     input:
     path bed
-    val genome
+    path genome
     
 
     output:
@@ -14,8 +16,7 @@ process FIND_MOTIFS_GENOME {
 
     script:
     """
-    echo ${bed} ${genome}
-    # findMotifsGenome.pl <peak/BED file> <genome> <output directory> -size # [options]
+    findMotifsGenome.pl  ${bed} ${genome} ${params.outdir}
     """
 
 }
