@@ -21,6 +21,7 @@
 */
 
 include { FIND_MOTIFS_GENOME } from './modules/homer_findMotif.nf'
+include { FIND_MOTIFS } from './modules/homer_findMotif.nf'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -33,17 +34,29 @@ workflow find_motifs {
 
         take:
 
-        bedfile
-        genomefile
+        foregroundfile
+        backgroundval
+
 
         main:
 
-        bed    = Channel.fromPath( bedfile, checkIfExists: true )
-        genome = Channel.fromPath( genomefile, checkIfExists: true, type: "any" )
-        FIND_MOTIFS_GENOME( bed, genome )
+        foreground  = Channel.fromPath( foregroundfile, checkIfExists: true )
+
+	stout = 'something went wrong'
+	if (params.genome_mode) {
+		background  = Channel.fromPath( backgroundval, checkIfExists: true, type: "any" )
+        	FIND_MOTIFS_GENOME( foreground, background )
+		stout = FIND_MOTIFS_GENOME.out.standardout
+
+	} else {
+		FIND_MOTIFS( foreground, backgroundval )
+		stout = FIND_MOTIFS.out.standardout
+
+	}
+
 
         emit:
-        stout = FIND_MOTIFS_GENOME.out.standardout
+        stout 
         
 }
 
